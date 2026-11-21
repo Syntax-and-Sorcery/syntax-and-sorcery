@@ -1,3 +1,3 @@
 # Syntax & Sorcery
 
-An RPG that teaches you programming.
+An RPG that teaches you the programming.
