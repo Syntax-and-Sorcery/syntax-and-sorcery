@@ -1,6 +1,7 @@
 // in-memory fixture GameData for NEXT_PUBLIC_DATA_SOURCE=mock
 // resets on page reload
 // inlines the few rules it needs so it doesn't call the lib/rules stubs that throw "TODO"
+import { ITEMS } from "@/content/sprites";
 import { conceptStats } from "@/lib/rules/progress";
 import type {
   Adventure,
@@ -11,7 +12,6 @@ import type {
   Encounter,
   EncounterStatus,
   InventoryEntry,
-  Item,
   PlayerPuzzle,
   Preferences,
   ProgressStats,
@@ -470,14 +470,6 @@ export function mockPuzzlesOf(adventureId: string): MockPuzzle[] {
   return [...puzzles.values()].filter((p) => p.adventureId === adventureId);
 }
 
-const items: Record<string, Item> = {
-  "scroll-of-remembering": {
-    slug: "scroll-of-remembering",
-    name: "Scroll of Remembering",
-    description: "Ask the game master one question about this fight. It doesn't cost XP.",
-  },
-};
-
 interface State {
   progress: Map<string, number>; // trackId to XP; presence means enrolled
   runs: Map<string, AdventureRun>; // by adventureId
@@ -772,7 +764,7 @@ export const mockGameData: GameData = {
     await delay();
     return [...state.inventory]
       .filter(([, quantity]) => quantity > 0)
-      .map(([slug, quantity]): InventoryEntry => ({ item: clone(items[slug]), quantity }));
+      .map(([slug, quantity]): InventoryEntry => ({ item: clone(ITEMS[slug]), quantity }));
   },
 
   async recordAttempt({ encounterId }) {

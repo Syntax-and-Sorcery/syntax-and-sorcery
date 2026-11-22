@@ -1,5 +1,6 @@
 // browser GameData backed by Supabase with RLS
 // always list columns when querying puzzles, since column-level grants reject select("*")
+import { ITEMS } from "@/content/sprites";
 import { createClient } from "@/lib/supabase/client";
 import type { Json } from "@/lib/supabase/database.types";
 import { conceptStats } from "@/lib/rules/progress";
@@ -44,14 +45,6 @@ async function userId(): Promise<string> {
   return id;
 }
 
-// TODO(T-25): import item metadata from a shared catalog once content/sprites.ts defines it
-const ITEMS: Record<string, Item> = {
-  "scroll-of-remembering": {
-    slug: "scroll-of-remembering",
-    name: "Scroll of Remembering",
-    description: "Ask the game master one question about this fight. It doesn't cost XP.",
-  },
-};
 const itemFor = (slug: string): Item => ITEMS[slug] ?? { slug, name: slug, description: "" };
 
 // RLS keeps fought puzzles readable even if flagged or disabled, so the join is only null if deleted

@@ -1,15 +1,12 @@
 // in-memory mock GameApi for local UI testing
 // code comments trigger outcomes: "// pass", "// loop", "// oops"
+import { BOSS_ENEMY_SPRITE, DEFAULT_ENEMY_COLOR, STORED_ENEMY_SPRITES } from "@/content/sprites";
 import type { GradeResult, PlayerPuzzle, RunResult, StoredEnemy, TestResult } from "@/lib/types";
 import { LOOPS_PUZZLES, mockClearedConcepts, mockPuzzle, mockPuzzlesOf, mockRun } from "@/lib/data/mock";
 import type { GameApi } from "./index";
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// copied from content/sprites.ts so mock mode doesn't depend on the T-25 stub
-const DEFAULT_ENEMY_COLOR = "#9E9E9E";
-const STORED_SPRITES = ["slime", "bat", "spider", "ghost", "goblin", "skeleton", "crab", "beetle"];
-const BOSS_SPRITE = "serpent";
 const spriteName = (slug: string) => slug.charAt(0).toUpperCase() + slug.slice(1);
 
 type CodePuzzle = Extract<PlayerPuzzle, { kind: "code" }>;
@@ -29,7 +26,7 @@ function codePuzzle(puzzleId: string): CodePuzzle {
   return found;
 }
 
-// matches the harness failure format (T-04), e.g. "Expected 2, got undefined"
+// matches the harness failure format, e.g. "Expected 2, got undefined"
 function failure(code: string): string {
   const expected = /\.to(?:Be|Equal)\((.*)\)\s*;\s*\}\s*\)\s*;?\s*$/.exec(code)?.[1] ?? "something else";
   return `Expected ${expected}, got undefined`;
@@ -99,7 +96,7 @@ export const mockGameApi: GameApi = {
     const hiddenTests = Array.from({ length: n }, (_, i) => i !== 1);
     const feedback =
       puzzleId === LOOPS_PUZZLES.kraken
-        ? "Your count comes out one short when the very first chest is rich." // simulates explainFailure (T-29)
+        ? "Your count comes out one short when the very first chest is rich." // simulates explainFailure
         : `${n - 1} of ${n} hidden tests passed.`; // plain count fallback when AI is unavailable
     return { passed: false, feedback, hiddenTests, status: "ok", stdout: "" };
   },
@@ -125,7 +122,7 @@ export const mockGameApi: GameApi = {
 
     return picked.map(({ puzzle, concept }, i): StoredEnemy => {
       const isBoss = concept === "boss";
-      const sprite = isBoss ? BOSS_SPRITE : STORED_SPRITES[i % STORED_SPRITES.length];
+      const sprite = isBoss ? BOSS_ENEMY_SPRITE : STORED_ENEMY_SPRITES[i % STORED_ENEMY_SPRITES.length];
       return {
         puzzleId: puzzle.id,
         name: spriteName(sprite),

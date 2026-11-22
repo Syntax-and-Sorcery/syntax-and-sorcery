@@ -1,6 +1,6 @@
 "use client";
 
-// sprites from Kenney's 1-Bit Pack; tile coordinates live in content/sprites.ts (T-25)
+// sprites from Kenney's 1-Bit Pack; tile coordinates live in content/sprites.ts
 import type { CSSProperties } from "react";
 import { DEFAULT_ENEMY_COLOR, ENEMY_SPRITES, FALLBACK_ENEMY, ITEM_SPRITES, type SpriteTile } from "@/content/sprites";
 import type { Enemy } from "@/lib/types";
@@ -65,7 +65,7 @@ export function GameMasterSprite({ size = 32 }: { size?: number }) {
   );
 }
 
-// renders an empty spacer until T-25 adds the item to ITEM_SPRITES
+// an item with no tile gets an empty spacer of the same size
 export function ItemSprite({ slug, size = 40, className }: { slug: string; size?: number; className?: string }) {
   const tile = itemTiles[slug] ?? itemTiles[ITEM_ALIASES[slug] ?? ""];
   if (!tile) return <span aria-hidden className={cn("inline-block shrink-0", className)} style={{ width: size, height: size }} />;
