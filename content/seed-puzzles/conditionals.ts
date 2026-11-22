@@ -145,20 +145,20 @@ function checkAccess(badge, required, hour) {
     ],
     hiddenTests: [
       {
-        name: "blocks a badge below the required clearance",
-        code: `test("blocks a badge below the required clearance", () => { expect(checkAccess("bronze", 2, 10)).toBe("denied"); });`,
+        name: "compares the badge's clearance with the required level",
+        code: `test("compares the badge's clearance with the required level", () => { expect(checkAccess("bronze", 2, 10)).toBe("denied"); expect(checkAccess("silver", 2, 10)).toBe("granted"); });`,
       },
       {
-        name: "blocks an unknown badge",
-        code: `test("blocks an unknown badge", () => { expect(checkAccess("purple", 1, 12)).toBe("denied"); });`,
+        name: "tells an unknown badge from a real one",
+        code: `test("tells an unknown badge from a real one", () => { expect(checkAccess("purple", 1, 12)).toBe("denied"); expect(checkAccess("bronze", 1, 12)).toBe("granted"); });`,
       },
       {
         name: "lets a gold badge in at any hour",
         code: `test("lets a gold badge in at any hour", () => { expect(checkAccess("gold", 3, 3)).toBe("granted"); });`,
       },
       {
-        name: "blocks a silver badge outside the day shift",
-        code: `test("blocks a silver badge outside the day shift", () => { expect(checkAccess("silver", 1, 22)).toBe("denied"); });`,
+        name: "checks the day shift for a badge that is not gold",
+        code: `test("checks the day shift for a badge that is not gold", () => { expect(checkAccess("silver", 1, 22)).toBe("denied"); expect(checkAccess("silver", 1, 12)).toBe("granted"); });`,
       },
       {
         name: "handles the boundary hours of the day shift",
