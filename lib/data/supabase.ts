@@ -45,7 +45,7 @@ async function userId(): Promise<string> {
   return id;
 }
 
-const itemFor = (slug: string): Item => ITEMS[slug] ?? { slug, name: slug, description: "" };
+const itemFor = (slug: string): Item => ITEMS[slug] ?? { slug, name: slug, plus: [], minus: "" };
 
 // RLS keeps fought puzzles readable even if flagged or disabled, so the join is only null if deleted
 const ENCOUNTER_COLUMNS =
