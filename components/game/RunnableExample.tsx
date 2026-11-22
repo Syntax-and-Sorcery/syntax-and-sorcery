@@ -7,15 +7,20 @@ import { Button } from "@/components/ui/8bit/button";
 import { Spinner } from "@/components/ui/8bit/spinner";
 import { getGameApi } from "@/lib/api";
 import type { RunResult } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 export function RunnableExample({ initialCode }: { initialCode: string }) {
   const [code, setCode] = useState(initialCode);
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<RunResult | null>(null);
+  const [failed, setFailed] = useState(false);
+
   async function run() {
     setRunning(true);
     try {
       setResult(await getGameApi().run(null, code));
+    } catch {
+      setFailed(true);
     } finally {
       setRunning(false);
     }
@@ -23,6 +28,31 @@ export function RunnableExample({ initialCode }: { initialCode: string }) {
   function reset() {
     setCode(initialCode);
     setResult(null);
+  }
+
+  function outputOf(result: RunResult): { text: string; isError: boolean } {
+    switch (result.status) {
+      case "ok":
+        return { text: result.stdout || "Nothing was printed.", isError: false };
+      case "syntax_error":
+      case "runtime_error":
+        return {
+          text: result.message ?? "There's a mistake in the code.",
+          isError: true,
+        };
+      case "timeout":
+        return { text: "The code ran for too long and was stopped.", isError: true };
+      case "memory":
+        return {
+          text: "The code used too much memory and was stopped.",
+          isError: true,
+        };
+      case "limit":
+        return { text: "You've used all your runs for today.", isError: true };
+      case "busy":
+      case "internal_error":
+        return { text: "The sandbox is busy. Try again in a moment.", isError: true };
+    }
   }
   return (
     <div className="flex flex-col gap-3">
@@ -60,9 +90,21 @@ export function RunnableExample({ initialCode }: { initialCode: string }) {
           Run
         </Button>
       </div>
+      {failed && (
+        <p className="text-sm text-destructive">
+          Something went wrong. Try again in a moment.
+        </p>
+      )}
       {result && (
-        <pre className="border-2 border-border bg-card p-3 text-sm whitespace-pre-wrap">
-          {result.stdout}
+        <pre
+          className={cn(
+            "border-2 bg-card p-3 text-sm whitespace-pre-wrap",
+            outputOf(result).isError
+              ? "border-destructive text-destructive"
+              : "border-border",
+          )}
+        >
+          {outputOf(result).text}
         </pre>
       )}
     </div>
