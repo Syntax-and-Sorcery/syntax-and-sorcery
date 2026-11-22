@@ -6,6 +6,7 @@ export const arrays: SeedPuzzle[] = [
     kind: "mcq",
     concept: "indexes",
     difficulty: 1,
+    theme: "fantasy",
     title: "The Second Shelf",
     description: "Read an item from an array by its index.",
     question:
@@ -21,6 +22,7 @@ export const arrays: SeedPuzzle[] = [
     kind: "mcq",
     concept: "push-pop",
     difficulty: 2,
+    theme: "pirates",
     title: "The Shrinking Bag",
     description: "Predict an array after push and pop calls.",
     question:
@@ -36,6 +38,7 @@ export const arrays: SeedPuzzle[] = [
     kind: "mcq",
     concept: "map-filter",
     difficulty: 3,
+    theme: "cyberpunk",
     title: "The Price Sieve",
     description: "Tell what filter returns for a condition.",
     question:
@@ -51,6 +54,7 @@ export const arrays: SeedPuzzle[] = [
     kind: "short",
     concept: "looping-over-arrays",
     difficulty: 2,
+    theme: "plain",
     title: "One Step Too Far",
     description: "Explain the bug in a loop that runs past the end of an array.",
     question:
@@ -66,6 +70,7 @@ export const arrays: SeedPuzzle[] = [
     kind: "short",
     concept: "find",
     difficulty: 3,
+    theme: "scifi",
     title: "The Empty Search",
     description: "Explain what find and filter return when nothing matches.",
     question:
@@ -81,6 +86,7 @@ export const arrays: SeedPuzzle[] = [
     kind: "code",
     concept: "boss",
     difficulty: 4,
+    theme: "fantasy",
     title: "The Dragon's Hoard",
     description:
       "Drop chests worth under 20, double the rest, and drop the last amount if more than three remain; tests the cutoff and the limit.",
