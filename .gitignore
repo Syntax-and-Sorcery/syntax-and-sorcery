@@ -97,6 +97,7 @@ dist/
 out/
 .vite/
 .env
+.env.local
 *.log
 npm-debug.log*
 .fuse_hidden*
