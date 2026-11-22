@@ -9,9 +9,9 @@
 
 Syntax & Sorcery is developed by a team of three Software Engineering students:
 
-- **Muhammad Saif Ullah Qureshi** — [CodeVoyager811](https://github.com/CodeVoyager811)
+- **Muhammad Saif Ullah Qureshi (CodeVoyager811)**
 - **Yehia Ehab** — [YehiaEhab17](https://github.com/YehiaEhab17)
-- **theParitet** — [GitHub profile](https://github.com/theParitet)
+- **Aleksandr Grechin** — [theParitet](https://github.com/theParitet)
 
 The team collaborates on the game's development, testing, and documentation.
 
