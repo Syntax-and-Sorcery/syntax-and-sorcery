@@ -50,4 +50,36 @@ export const basics: SeedPuzzle[] = [
     explanation:
       '`credits` is a string, so `+` joins the text instead of adding, and the result is "53".',
   },
+
+  // puzzle 4
+  {
+    kind: "short",
+    concept: "variables",
+    difficulty: 2,
+    theme: "plain",
+    title: "Let or Const",
+    description: "Explain when to use const instead of let.",
+    question: "When should you declare a variable with `const` instead of `let`?",
+    modelAnswer:
+      "Use `const` for a value that never changes, because trying to give it a new value causes an error. Use `let` when the value will change later.",
+    rubric:
+      "Passes if it says const is for values that never change or can't be reassigned, and let is for values that change. Wording and examples don't matter.",
+  },
+
+  // puzzle 5
+  {
+    kind: "short",
+    concept: "strings",
+    difficulty: 3,
+    theme: "pirates",
+    title: "The Captain's Slice",
+    description:
+      "Explain what slice returns and whether the end position is included.",
+    question:
+      'What does `"Captain".slice(0, 3)` return, and is the character at position 3 included?',
+    modelAnswer:
+      'It returns "Cap". The start position is included but the end position is not, so it stops just before position 3.',
+    rubric:
+      'Passes if it says the result is "Cap" and that the end position is not included. Wording doesn\'t matter.',
+  },
 ];
