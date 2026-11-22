@@ -22,6 +22,8 @@ export const maxDuration = 300;
 const bodySchema = z.object({ id: z.string().uuid(), messages: z.array(z.unknown()) });
 
 export async function POST(req: Request) {
+  // mock mode has no game master, so the page falls back to no-AI mode with the mock offers
+  if (process.env.NEXT_PUBLIC_DATA_SOURCE === "mock") return Response.json({ error: "ai_unavailable" }, { status: 503 });
   const user = await requireUser();
   if (!user) return Response.json({ error: "Not signed in" }, { status: 401 });
 

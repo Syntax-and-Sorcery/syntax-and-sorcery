@@ -286,6 +286,7 @@ export function GameChat({ runId, trackId, concepts, initialMessages, initialInv
         ),
       }}
       chat={chat}
+      chatWidth={aiDown ? "max-w-[900px]" : undefined}
       composer={composer}
       scrollKey={`${messages.length}:${lastLength(messages)}:${status}:${aiDown}`}
       tabs={tabs}
