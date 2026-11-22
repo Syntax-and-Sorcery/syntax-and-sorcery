@@ -1,16 +1,18 @@
-// TODO(T-03): loot drop calculations from RULES.loot
+import { RULES } from "./config";
+import { levelForXp } from "./levels";
 
-// normal enemies drop "scroll-of-remembering" with scrollChance; bosses drop bossScrolls
-// use the passed random()
+const SCROLL = "scroll-of-remembering";
+
+// Normal enemies have a configurable chance to drop a scroll.
+// Bosses award a fixed number of scrolls without a random roll.
 export function rollLoot(enemy: { isBoss: boolean; difficulty: number }, random: () => number): string[] {
-  void enemy;
-  void random;
-  throw new Error("TODO");
+  if (enemy.isBoss) return Array(RULES.loot.bossScrolls).fill(SCROLL);
+  return random() < RULES.loot.scrollChance ? [SCROLL] : [];
 }
 
-// drops levelUpScrolls per level gained between xpBefore and xpAfter
+// Award one configured bundle of scrolls for every level gained.
+// Losing XP or staying on the same level cannot award scrolls.
 export function levelUpLoot(xpBefore: number, xpAfter: number): string[] {
-  void xpBefore;
-  void xpAfter;
-  throw new Error("TODO");
+  const levelsGained = Math.max(0, levelForXp(xpAfter) - levelForXp(xpBefore));
+  return Array(levelsGained * RULES.loot.levelUpScrolls).fill(SCROLL);
 }
