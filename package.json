@@ -9,6 +9,7 @@
     "lint": "eslint",
     "test": "vitest",
     "test:ci": "vitest run --passWithNoTests",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "next typegen && tsc --noEmit",
     "seed": "tsx --env-file=.env.local scripts/seed.ts"
   },
@@ -60,6 +61,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.3.0",
+    "@vitest/coverage-v8": "^5.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
     "jsdom": "^31.0.1",

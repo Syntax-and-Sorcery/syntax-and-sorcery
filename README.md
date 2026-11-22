@@ -87,6 +87,8 @@ npm run test:ci
 
 The test suite includes tests for the XP and loot reward rules in `lib/rules/xp.test.ts` and `lib/rules/loot.test.ts`.
 
+Run `npm run test:coverage` for a coverage report. CI runs it and fails if line or statement coverage drops below 70% for the logic scope in `vitest.config.mts`.
+
 To run Vitest in watch mode:
 
 ```bash
