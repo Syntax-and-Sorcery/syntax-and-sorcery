@@ -17,6 +17,8 @@ import { NoAiPanel } from "@/components/game/NoAiPanel";
 import { LessonChip, type PanelTab } from "@/components/game/SidePanel";
 import { stateOf } from "@/components/game/rules";
 import { PuzzleView, type FightState } from "@/components/puzzles/PuzzleView";
+import { FightError } from "@/components/puzzles/parts";
+import { Button } from "@/components/ui/8bit/button";
 import { getGameApi } from "@/lib/api";
 import { getGameData } from "@/lib/data";
 import type { GameUIMessage } from "@/lib/server/ai/game-tools";
@@ -47,6 +49,7 @@ export function GameChat({ runId, trackId, concepts, initialMessages, initialInv
   const [openLessons, setOpenLessons] = useState<string[]>(() => lessonsGiven(initialMessages)); // concept slugs
   const [scrollMode, setScrollMode] = useState(false);
   const [aiDown, setAiDown] = useState<AiDown | null>(null);
+  const [turnFailed, setTurnFailed] = useState(false); // our own error, not an outage: offer a retry, stay online
   const [offers, setOffers] = useState<StoredEnemy[]>([]);
   // no-AI mode tracks browser-started fights and queues their summaries until AI returns
   const [offlineFight, setOfflineFight] = useState<ActiveFight | null>(null);
@@ -78,8 +81,12 @@ export function GameChat({ runId, trackId, concepts, initialMessages, initialInv
     messages: initialMessages,
     transport,
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
-    // matches "ai_unavailable" from stream errors or the JSON body of a 503 or 429
-    onError: (error) => goOffline(error.message.includes("ai_limit") ? "ai_limit" : "ai_unavailable"),
+    // "ai_unavailable" comes from a stream error or a 503 body, "ai_limit" from a 429 body
+    onError: (error) => {
+      if (error.message.includes("ai_limit")) goOffline("ai_limit");
+      else if (error.message.includes("ai_unavailable")) goOffline("ai_unavailable");
+      else setTurnFailed(true);
+    },
     onFinish: async ({ isError, isAbort, isDisconnect }) => {
       const hint = pendingHint.current;
       pendingHint.current = null;
@@ -225,6 +232,14 @@ export function GameChat({ runId, trackId, concepts, initialMessages, initialInv
     <>
       <ChatLog messages={messages} onOpenLesson={openLesson} onChoose={(toolCallId, puzzleId) => void addToolOutput({ tool: "ask_choice", toolCallId, output: { puzzleId } })} />
       {status === "submitted" && <GmMessage thinking />}
+      {turnFailed && status === "error" && (
+        <FightError>
+          Something went wrong. Try again in a moment.{" "}
+          <Button variant="outline" size="sm" className="ml-2 text-[9px]" onClick={() => { setTurnFailed(false); void regenerate(); }}>
+            Try again
+          </Button>
+        </FightError>
+      )}
       {aiDown && (
         <NoAiPanel
           reason={aiDown}

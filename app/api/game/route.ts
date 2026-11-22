@@ -1,8 +1,8 @@
 // streams the game master conversation in AI SDK UI message format for GameChat
 import { anthropic } from "@ai-sdk/anthropic";
 import {
-  convertToModelMessages, createIdGenerator, createUIMessageStreamResponse, isStepCount,
-  streamText, toUIMessageStream, validateUIMessages,
+  APICallError, convertToModelMessages, createIdGenerator, createUIMessageStreamResponse, isStepCount,
+  RetryError, streamText, toUIMessageStream, validateUIMessages,
 } from "ai";
 import { after } from "next/server";
 import { z } from "zod";
@@ -68,6 +68,9 @@ export async function POST(req: Request) {
     messages: await convertToModelMessages(validated, { tools, ignoreIncompleteToolCalls: true }),
     tools,
     stopWhen: isStepCount(8),
+    // the system prompt changes every turn, which voids earlier thinking blocks
+    // drop those instead of letting Anthropic reject the whole request
+    providerOptions: { anthropic: { thinking: { blockBinding: { prefixMismatchBehavior: "drop_block" } } } },
   });
   void result.consumeStream(); // keeps generating even if the player closes the tab
 
@@ -81,10 +84,10 @@ export async function POST(req: Request) {
       originalMessages: validated,
       // saved messages need ids; without this the new assistant message would have an empty one
       generateMessageId: createIdGenerator({ prefix: "msg", size: 16 }),
-      // mid-stream failures reach the chat's onError with this string and trigger no-AI mode
+      // the chat drops to no-AI mode only on "ai_unavailable", so only a real outage gets that string
       onError: (error) => {
         void logEvent("ai_failure", { route: "game", runId, message: String(error) }, user.id);
-        return "ai_unavailable";
+        return isOutage(error) ? "ai_unavailable" : "game_error";
       },
       // keep tool error messages unredacted so the model can read them on the next step
       redactToolErrors: false,
@@ -99,4 +102,11 @@ export async function POST(req: Request) {
       },
     }),
   });
+}
+
+// overloaded, rate limited, a server error or no answer at all; anything else is our bug
+function isOutage(error: unknown): boolean {
+  const cause = RetryError.isInstance(error) ? error.lastError : error;
+  if (!APICallError.isInstance(cause)) return false;
+  return cause.statusCode === undefined || cause.statusCode === 429 || cause.statusCode >= 500;
 }
