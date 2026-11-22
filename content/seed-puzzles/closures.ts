@@ -90,4 +90,62 @@ export const closures: SeedPuzzle[] = [
       "Passes if it says the parentheses call launch immediately, and the fix is to pass the function without calling it. Wording doesn't matter.",
     maxLength: 300,
   },
+
+  // puzzle 6 (boss)
+  {
+    kind: "code",
+    concept: "boss",
+    difficulty: 4,
+    theme: "pirates",
+    title: "The Lookout's Shout",
+    description:
+      "Build a lookout that counts ships and shouts once when the limit is reached; tests the limit, quiet counts and separate lookouts.",
+    starterCode: `// Build a lookout who counts ships.
+// makeLookout(limit, shout) returns a function. Each call to it counts one more ship and returns the total so far.
+// When the total reaches limit exactly, call shout(total). Later ships don't shout again.
+// Every lookout keeps their own count.
+// Example: const watch = makeLookout(2, (n) => console.log(n));
+//   watch() returns 1; the next watch() calls shout(2) and returns 2.
+function makeLookout(limit, shout) {
+
+}`,
+    referenceSolution: `function makeLookout(limit, shout) {
+  let count = 0;
+  return () => {
+    count = count + 1;
+    if (count === limit) {
+      shout(count);
+    }
+    return count;
+  };
+}`,
+    sampleTests: [
+      {
+        name: "counts each ship sighted",
+        code: `test("counts each ship sighted", () => { const watch = makeLookout(5, () => {}); watch(); expect(watch()).toBe(2); });`,
+      },
+    ],
+    hiddenTests: [
+      {
+        name: "shouts with the total when the limit is reached",
+        code: `test("shouts with the total when the limit is reached", () => { const shouts = []; const watch = makeLookout(3, (n) => shouts.push(n)); watch(); watch(); watch(); expect(shouts).toEqual([3]); });`,
+      },
+      {
+        name: "stays quiet before the limit",
+        code: `test("stays quiet before the limit", () => { const shouts = []; const watch = makeLookout(3, (n) => shouts.push(n)); watch(); watch(); expect(shouts).toEqual([]); });`,
+      },
+      {
+        name: "shouts only once when more ships follow",
+        code: `test("shouts only once when more ships follow", () => { const shouts = []; const watch = makeLookout(2, (n) => shouts.push(n)); watch(); watch(); watch(); watch(); expect(shouts).toEqual([2]); });`,
+      },
+      {
+        name: "keeps separate counts for separate lookouts",
+        code: `test("keeps separate counts for separate lookouts", () => { const first = makeLookout(10, () => {}); const second = makeLookout(10, () => {}); first(); first(); expect(second()).toBe(1); });`,
+      },
+      {
+        name: "shouts on the very first ship when the limit is one",
+        code: `test("shouts on the very first ship when the limit is one", () => { const shouts = []; const watch = makeLookout(1, (n) => shouts.push(n)); watch(); expect(shouts).toEqual([1]); });`,
+      },
+    ],
+  },
 ];
