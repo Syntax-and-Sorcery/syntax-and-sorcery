@@ -1,11 +1,11 @@
 ### The problem
-A troll guards the bridge. With more than 10 gold you cross for free, with more than 5 you pay a toll, and otherwise you're stuck. Your code has to do something different in each case.
+A troll guards the bridge. With more than 10 gold, you cross for free. With more than 5, you pay a toll. Otherwise, you're stuck. Your code needs to do something different in each case.
 
 ### The idea
-`if` runs a block of code only when its condition is true. `else if` checks another condition when the first one was false, and `else` runs when none of them were true.
+`if` runs a block of code only when its condition is true. The condition is usually a comparison, like `gold > 10`. `else if` checks another condition when the first one is false. `else` runs when none of the conditions are true.
 
 ### Like in real life
-Picture a guard at a door. Show your pass and you go in; otherwise the guard turns you away.
+Picture a guard at a door. Show your pass and you go in. Otherwise, the guard turns you away.
 
 ### In code
 ```js
