@@ -4,7 +4,7 @@
 import "server-only";
 import { tool, type InferUITools, type UIMessage } from "ai";
 import { z } from "zod";
-import { SPRITE_SLUGS } from "@/content/sprites";
+import { ENEMY_SPRITES, FALLBACK_ENEMY, SPRITE_SLUGS } from "@/content/sprites";
 import { adventureState } from "@/lib/rules/adventure-state";
 import { listPuzzles } from "@/lib/server/puzzles";
 import { finishRun, getEncounterForModel, startEncounter } from "@/lib/server/runs";
@@ -38,10 +38,13 @@ export type GameMessageMetadata = z.infer<typeof gameMessageMetadataSchema>;
 
 const kind = z.enum(["mcq", "short", "code"]);
 const difficulty = z.number().int().min(1).max(5);
+// the enum alone is just slugs, so the description gives the model each sprite's words to match against
+const spriteWords = Object.entries(ENEMY_SPRITES).map(([slug, { words }]) => `- ${slug}: ${words}`);
+const spriteDescription = `The sprite slug whose words fit the enemy best, or ${FALLBACK_ENEMY} if none does:\n${spriteWords.join("\n")}`;
 const enemyOption = z.object({
   puzzleId: z.string().uuid(),
   name: z.string().max(60),
-  sprite: z.enum(SPRITE_SLUGS),
+  sprite: z.enum(SPRITE_SLUGS).describe(spriteDescription),
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
 });
 
