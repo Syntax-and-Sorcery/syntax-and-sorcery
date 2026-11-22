@@ -281,7 +281,12 @@ export function GameChat({ runId, trackId, concepts, initialMessages, initialInv
             entries={inventory}
             inFight={!!active && !busy}
             aiDown={!!aiDown}
-            onUse={(slug) => (slug === "hint" ? askHint("basic") : setScrollMode(true))}
+            active={scrollMode ? SCROLL : undefined}
+            onUse={(slug) => {
+              setActiveTab("chat"); // on mobile the reply and the scroll's text box are on the Chat tab
+              if (slug === "hint") askHint("basic");
+              else setScrollMode(true);
+            }}
           />
         ),
       }}

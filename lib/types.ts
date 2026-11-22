@@ -66,7 +66,8 @@ export interface StoredEnemy extends EnemyOption {
   isBoss: boolean;
 }
 
-export interface Item { slug: string; name: string; description: string }
+// plus and minus are the benefit and cost lines in the item popover
+export interface Item { slug: string; name: string; plus: string[]; minus: string }
 export interface InventoryEntry { item: Item; quantity: number }
 
 export type Theme = "fantasy" | "scifi" | "pirates" | "cyberpunk" | "plain";

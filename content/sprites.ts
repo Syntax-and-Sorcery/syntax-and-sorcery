@@ -83,7 +83,8 @@ export const ITEMS: Record<string, Item> = {
   "scroll-of-remembering": {
     slug: "scroll-of-remembering",
     name: "Scroll of Remembering",
-    description: "Ask the game master one question about this fight. It doesn't cost XP.",
+    plus: ["Ask one question about this fight", "No XP cost"],
+    minus: "Uses 1 scroll when you send",
   },
 };
 
