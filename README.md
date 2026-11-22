@@ -2,6 +2,9 @@
 
 An RPG that teaches you the programming.
 
+Live website at https://syntax.quest.
+Status page: https://stats.uptimerobot.com/p4BzWGe833
+
 ## Team
 
 ## Problem
