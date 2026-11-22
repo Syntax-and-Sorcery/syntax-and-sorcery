@@ -164,13 +164,12 @@ export function AdventureScreen({
 
   const shell: Shell = { maximised, setMaximised, desktop };
 
-  // every tab stays mounted and hidden ones just aren't displayed, so switching tabs keeps a fight's state
-  const tabPanels = (current: string | undefined) =>
-    tabs.map((t) => (
-      <div key={t.id} className={cn("flex min-h-0 flex-1 flex-col", t.id !== current && "hidden")}>
-        {renderTab(t.id)}
-      </div>
-    ));
+  // tabs stay mounted so switching keeps a fight's state, and mobile hides the whole section on Chat so panelTab works for both
+  const tabPanels = tabs.map((t) => (
+    <div key={t.id} className={cn("flex min-h-0 flex-1 flex-col", t.id !== panelTab && "hidden")}>
+      {renderTab(t.id)}
+    </div>
+  ));
 
   if (!desktop) {
     const all: PanelTab[] = [{ id: "chat", label: "Chat", icon: <MessageText width={14} height={14} />, closable: false }, ...tabs];
@@ -192,9 +191,7 @@ export function AdventureScreen({
             ))}
           </TabRow>
           <div className={cn("flex min-h-0 flex-1 flex-col", mobileTab !== "chat" && "hidden")}>{chatColumn}</div>
-          {tabs.length > 0 && (
-            <section className={cn("flex min-h-0 flex-1 flex-col bg-panel", mobileTab === "chat" && "hidden")}>{tabPanels(mobileTab)}</section>
-          )}
+          <section className={cn("flex min-h-0 flex-1 flex-col bg-panel", mobileTab === "chat" && "hidden")}>{tabPanels}</section>
           <footer className="flex items-center gap-3 border-t-2 border-border bg-panel px-4 py-3">
             <div className="max-w-[45%] shrink-0">{sidebar.inventory}</div>
             <LevelBar info={sidebar.level} className="min-w-0 flex-1 gap-2 pl-1" barClassName="mr-1.5 h-3" />
@@ -214,14 +211,14 @@ export function AdventureScreen({
           orientation="horizontal"
           className={cn("min-w-0 flex-1", maximised && "[&>[data-panel]:first-child]:hidden! [&>[data-separator]]:hidden!")}
         >
-          <ResizablePanel key="chat" id="chat" minSize={380}>
+          <ResizablePanel id="chat" minSize={380}>
             {chatColumn}
           </ResizablePanel>
-          {panelTab && <SplitHandle key="handle" />}
+          {panelTab && <SplitHandle />}
           {panelTab && (
-            <ResizablePanel key="side" id="side" defaultSize={640} minSize={440}>
+            <ResizablePanel id="side" defaultSize={640} minSize={440}>
               <SidePanel tabs={tabs} active={panelTab} onSelect={onSelectTab} onClose={onCloseTab} maximised={maximised} setMaximised={setMaximised}>
-                {tabPanels(panelTab)}
+                {tabPanels}
               </SidePanel>
             </ResizablePanel>
           )}

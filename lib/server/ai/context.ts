@@ -197,8 +197,8 @@ function playerBlock(ctx: GameContext): string {
 
 // server computes adventure progress so the model never tracks clears or boss unlocks itself
 function stateBlock(ctx: GameContext, lessons: Set<string>): string {
-  // beating the boss completes the run, but the game master still owes the story summary
-  if (ctx.runStatus === "completed" && ctx.storySaved) return "Adventure state\n- The adventure is complete. Chat freely; there are no more fights to offer.";
+  // check storySaved instead of runStatus because beating the boss completes the run before the story summary is saved
+  if (ctx.storySaved) return "Adventure state\n- The adventure is complete. Chat freely; there are no more fights to offer.";
 
   const state = adventureState(ctx.concepts, ctx.encounters);
   const need = RULES.adventure.winsToClear;

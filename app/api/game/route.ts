@@ -77,22 +77,16 @@ export async function POST(req: Request) {
     onError: ({ error }) => void logEvent("ai_failure", { route: "game", runId, message: String(error) }, user.id),
   });
 
-  // the browser and the save each read their own copy of the stream, so the turn runs to the end even if the player leaves
-  // both need the same message id, or the saved message wouldn't match the one the browser has
-  const messageId = createIdGenerator({ prefix: "msg", size: 16 })();
-  const streamOptions = {
+  // the browser and the save each read their own copy, so the turn runs to the end and is saved even if the player leaves
+  const [browserStream, saveStream] = toUIMessageStream<typeof tools, GameUIMessage>({
+    stream: result.stream,
     tools,
     originalMessages: validated,
-    generateMessageId: () => messageId,
+    generateMessageId: createIdGenerator({ prefix: "msg", size: 16 }),
     // the chat drops to no-AI mode only on "ai_unavailable", so only a real outage gets that string
-    onError: (error: unknown) => (isOutage(error) ? "ai_unavailable" : "game_error"),
+    onError: (error) => (isOutage(error) ? "ai_unavailable" : "game_error"),
     // keep tool error messages unredacted so the model can read them on the next step
     redactToolErrors: false,
-  };
-
-  const saveStream = toUIMessageStream<typeof tools, GameUIMessage>({
-    ...streamOptions,
-    stream: result.stream,
     onEnd: async ({ messages, outcome, finishReason }) => {
       // a mid-stream error still ends as "completed", so the finish reason has to be checked too
       // skipping a failed turn means a reload retries it, and a failed opening doesn't leave a blank chat that never restarts
@@ -103,12 +97,10 @@ export async function POST(req: Request) {
         console.error("Saving the conversation failed", error); // the browser still has it; the next turn saves again
       }
     },
-  });
+  }).tee();
   after(consumeStream({ stream: saveStream })); // keeps the function alive on Vercel until the turn is done and saved
 
-  return createUIMessageStreamResponse({
-    stream: toUIMessageStream<typeof tools, GameUIMessage>({ ...streamOptions, stream: result.stream }),
-  });
+  return createUIMessageStreamResponse({ stream: browserStream });
 }
 
 // overloaded, rate limited, a server error or no answer at all; anything else is our bug

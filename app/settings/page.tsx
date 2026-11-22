@@ -215,7 +215,7 @@ export default function SettingsPage() {
       .catch(() => void toast("Your settings couldn't be saved. Try again in a moment."));
   }
 
-  // choices save right away, the note saves when the player leaves the box
+  // choices save right away, while the note waits for blur so typing doesn't save on every keystroke
   const set = <K extends keyof Preferences>(key: K, value: Preferences[K]) => {
     const next = { ...prefs, [key]: value };
     setPrefs(next);
