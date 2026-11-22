@@ -108,3 +108,17 @@ npm-debug.log*
 docs/
 .vercel
 .env*
+!.env.example
+
+# From create-next-app
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+/build
+*.pem
+.pnpm-debug.log*
+next-env.d.ts
