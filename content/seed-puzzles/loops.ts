@@ -133,12 +133,12 @@ function collectGold(n, limit) {
         code: `test("accepts a total exactly at the limit", () => { expect(collectGold(2, 30)).toBe(30); });`,
       },
       {
-        name: "collects nothing when there are no rooms",
-        code: `test("collects nothing when there are no rooms", () => { expect(collectGold(0, 50)).toBe(0); });`,
+        name: "handles no rooms and a single room",
+        code: `test("handles no rooms and a single room", () => { expect(collectGold(0, 50)).toBe(0); expect(collectGold(1, 50)).toBe(10); });`,
       },
       {
-        name: "collects nothing when the first room is already too much",
-        code: `test("collects nothing when the first room is already too much", () => { expect(collectGold(4, 5)).toBe(0); });`,
+        name: "handles a first room over the limit and exactly at it",
+        code: `test("handles a first room over the limit and exactly at it", () => { expect(collectGold(4, 5)).toBe(0); expect(collectGold(4, 10)).toBe(10); });`,
       },
     ],
   },
