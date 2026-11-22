@@ -54,4 +54,40 @@ export const closures: SeedPuzzle[] = [
     explanation:
       '`setTimeout` stores its callback and moves on, so "A" and "C" print first. The callback runs 100 ms later and prints "B".',
   },
+
+  // puzzle 4
+  {
+    kind: "short",
+    concept: "returning-functions",
+    difficulty: 3,
+    theme: "fantasy",
+    title: "The Remembered Number",
+    description:
+      "Explain why a returned function can still use its outer function's variable.",
+    question:
+      "In `const double = makeMultiplier(2);`, why can `double(10)` still use the 2 after `makeMultiplier` has finished running?",
+    modelAnswer:
+      "The returned function is a closure. It remembers the variables from where it was created, including `times`, even after the outer function finishes.",
+    rubric:
+      "Passes if it says the returned or inner function remembers or keeps access to the outer function's variable (a closure). Wording doesn't matter.",
+    maxLength: 300,
+  },
+
+  // puzzle 5
+  {
+    kind: "short",
+    concept: "callbacks",
+    difficulty: 4,
+    theme: "scifi",
+    title: "The Early Launch",
+    description:
+      "Explain why calling a function inside setTimeout's argument is a bug and how to fix it.",
+    question:
+      "What is wrong with `setTimeout(launch(), 1000)`, and how do you fix it?",
+    modelAnswer:
+      "`launch()` runs the function right away and passes its result to setTimeout. Pass the function itself, `setTimeout(launch, 1000)`, so setTimeout calls it later.",
+    rubric:
+      "Passes if it says the parentheses call launch immediately, and the fix is to pass the function without calling it. Wording doesn't matter.",
+    maxLength: 300,
+  },
 ];
