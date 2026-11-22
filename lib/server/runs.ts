@@ -60,6 +60,7 @@ export async function finishRun(ctx: GameContext, summary: string): Promise<{ ok
     .eq("id", ctx.runId);
   if (error) throw error;
   ctx.runStatus = "completed";
+  ctx.storySaved = true;
   return { ok: true };
 }
 

@@ -115,7 +115,7 @@ export function gameTools(ctx: GameContext) {
     }),
     finish_adventure: tool({
       description: "Call once, after the boss is defeated. Saves a short story summary for the next adventures.",
-      inputSchema: z.object({ summary: z.string().max(1000) }),
+      inputSchema: z.object({ summary: z.string().min(1).max(1000) }),
       execute: async ({ summary }) =>
         state().bossDefeated
           ? finishRun(ctx, summary)

@@ -7,6 +7,7 @@ import { EditorThemeContext } from "@/components/editor/themes";
 import { AdventureComplete } from "@/components/game/AdventureComplete";
 import { Loading } from "@/components/game/bits";
 import { completedState, levelInfo } from "@/components/game/rules";
+import { IS_MOCK } from "@/components/site/session";
 import { getGameData } from "@/lib/data";
 import type { GameUIMessage } from "@/lib/server/ai/game-tools";
 import {
@@ -64,6 +65,16 @@ export default function AdventurePage() {
     };
   }, [track, adventure]);
 
+  // the server saves the last turn's messages after the stream ends, so keep the ones the browser already has
+  const complete = useCallback(
+    (messages: GameUIMessage[]) => {
+      void load(track, adventure)
+        .then((v) => setView(typeof v === "string" ? v : { ...v, run: { ...v.run, messages } }))
+        .catch(() => {}); // the completion screen shows on the next reload instead
+    },
+    [track, adventure],
+  );
+
   useEffect(() => {
     if (view === "locked") router.replace(`/play/${track}`);
   }, [view, router, track]);
@@ -94,7 +105,8 @@ export default function AdventurePage() {
 
   return (
     <EditorThemeContext.Provider value={view.preferences.editorTheme}>
-      {view.run.status === "completed" ? (
+      {/* a boss win completes the run before the game master writes the story, so wait for it, except in mock mode with no AI */}
+      {view.run.status === "completed" && (view.run.storySummary || IS_MOCK) ? (
         <AdventureComplete
           title={view.adventure.title}
           run={view.run}
@@ -112,6 +124,7 @@ export default function AdventurePage() {
           initialEncounters={view.encounters}
           sidebar={sidebar}
           onProgress={reloadXp}
+          onComplete={complete}
         />
       )}
     </EditorThemeContext.Provider>

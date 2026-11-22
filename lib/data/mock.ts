@@ -785,6 +785,9 @@ export const mockGameData: GameData = {
     const trackId = trackOfRun(e.runId);
     state.progress.set(trackId, (state.progress.get(trackId) ?? 0) + xp);
     for (const slug of loot) state.inventory.set(slug, (state.inventory.get(slug) ?? 0) + 1);
+    // same as settle_encounter, beating the boss completes the run
+    const run = mockRun(e.runId);
+    if (e.isBoss && run?.status === "in_progress") run.status = "completed";
     return true;
   },
 
