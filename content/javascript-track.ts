@@ -34,8 +34,8 @@ export const javascriptTrack: TrackOutline = {
       title: "The Fork in the Road",
       summary: "Make your code choose a path.",
       concepts: [
-        { slug: "if-else", name: "If and else", description: "Running code only when a condition is true." },
         { slug: "comparisons", name: "Comparisons", description: "Checking whether values are equal, bigger, or smaller." },
+        { slug: "if-else", name: "If and else", description: "Running code only when a condition is true." },
         { slug: "logical-operators", name: "Logical operators", description: "Combining conditions with and, or, and not." },
         { slug: "switch", name: "Switch", description: "Picking one of many paths by value." },
       ],
@@ -47,7 +47,7 @@ export const javascriptTrack: TrackOutline = {
       concepts: [
         { slug: "for-loops", name: "For loops", description: "Repeating code a known number of times." },
         { slug: "while-loops", name: "While loops", description: "Repeating code while a condition stays true." },
-        { slug: "accumulators", name: "Accumulators", description: "Building a result, like a total, one round at a time." },
+        { slug: "accumulators", name: "Accumulators", description: "Building a total or other result one round at a time." },
         { slug: "break-continue", name: "Break and continue", description: "Leaving a loop early or skipping one round." },
       ],
     },
@@ -56,11 +56,11 @@ export const javascriptTrack: TrackOutline = {
       title: "The Spellwright's Tower",
       summary: "Package code so you can run it again.",
       concepts: [
-        { slug: "defining-functions", name: "Defining functions", description: "Naming a block of code and running it by calling that name." },
+        { slug: "defining-functions", name: "Defining functions", description: "Naming a block of code so you can run it by name." },
         { slug: "parameters", name: "Parameters", description: "Passing values into a function." },
         { slug: "return-values", name: "Return values", description: "Getting a result back from a function." },
-        { slug: "scope", name: "Scope", description: "Where your code can see and use a variable." },
         { slug: "arrow-functions", name: "Arrow functions", description: "A shorter way to write small functions." },
+        { slug: "callbacks", name: "Callbacks", description: "Passing a function for another function to call." },
       ],
     },
     {
@@ -83,7 +83,7 @@ export const javascriptTrack: TrackOutline = {
         { slug: "properties", name: "Properties", description: "Storing named values inside one object." },
         { slug: "methods", name: "Methods", description: "Functions that belong to an object." },
         { slug: "looping-over-keys", name: "Looping over keys", description: "Visiting every property of an object." },
-        { slug: "arrays-of-objects", name: "Lists of objects", description: "Keeping many objects in one array and reading their properties." },
+        { slug: "arrays-of-objects", name: "Arrays of objects", description: "Storing objects in an array and reading their properties." },
       ],
     },
     {
@@ -91,10 +91,10 @@ export const javascriptTrack: TrackOutline = {
       title: "The Closure Keep",
       summary: "Functions that remember where you created them.",
       concepts: [
-        { slug: "functions-in-functions", name: "Functions in functions", description: "Defining a function inside another one." },
+        { slug: "scope", name: "Scope", description: "Where your code can see and use a variable." },
+        { slug: "functions-in-functions", name: "Functions in functions", description: "Defining one function inside another." },
         { slug: "returning-functions", name: "Returning functions", description: "Making a function that builds and returns another function." },
         { slug: "counters", name: "Counters", description: "A function that keeps its own private count." },
-        { slug: "callbacks", name: "Callbacks", description: "Passing a function for another function to call." },
       ],
     },
   ],

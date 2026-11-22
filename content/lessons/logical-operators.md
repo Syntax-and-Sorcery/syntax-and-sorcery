@@ -32,7 +32,7 @@ if (hasKey && isNight) {
 | `if (hasKey && isNight)` | key and night | false, so it prints "The vault stays shut." |
 
 ### Watch out
-Write out both sides in full. `gold > 5 && < 10` is an error; write `gold > 5 && gold < 10`.
+Write out both sides in full. `door === "red" || "blue"` doesn't check two colors. JavaScript reads it as `(door === "red") || "blue"`. Because `"blue"` counts as true on its own, the check always passes. Write `door === "red" || door === "blue"`.
 
 ### Not just vaults
 A login checks the name and the password. A game ends when health runs out or time is up.
