@@ -76,4 +76,58 @@ export const arrays: SeedPuzzle[] = [
     rubric:
       "Passes if it says find gives undefined and filter gives an empty array. Wording and examples don't matter.",
   },
+
+  // puzzle 6 (boss)
+  {
+    kind: "code",
+    concept: "boss",
+    difficulty: 4,
+    title: "The Dragon's Hoard",
+    description:
+      "Drop chests worth under 20, double the rest, and drop the last amount if more than three remain; tests the cutoff and the limit.",
+    starterCode: `// The dragon's hoard is guarded by a curse.
+// Input: chests, an array of numbers (the gold in each chest).
+// Ignore chests worth less than 20. Double every other chest.
+// If more than 3 amounts are left, the dragon keeps the last one, so drop it.
+// Return the final array of amounts.
+// Example: plunder([10, 30, 20]) returns [60, 40].
+function plunder(chests) {
+
+}`,
+    referenceSolution: `function plunder(chests) {
+  const loot = chests.filter((gold) => gold >= 20).map((gold) => gold * 2);
+  if (loot.length > 3) {
+    loot.pop();
+  }
+  return loot;
+}`,
+    sampleTests: [
+      {
+        name: "doubles chests above the curse line",
+        code: `test("doubles chests above the curse line", () => { expect(plunder([30, 50])).toEqual([60, 100]); });`,
+      },
+    ],
+    hiddenTests: [
+      {
+        name: "skips cursed chests among good ones",
+        code: `test("skips cursed chests among good ones", () => { expect(plunder([10, 25, 5, 40])).toEqual([50, 80]); });`,
+      },
+      {
+        name: "keeps a chest worth exactly the cutoff",
+        code: `test("keeps a chest worth exactly the cutoff", () => { expect(plunder([20])).toEqual([40]); });`,
+      },
+      {
+        name: "returns an empty list when every chest is cursed",
+        code: `test("returns an empty list when every chest is cursed", () => { expect(plunder([1, 2, 3])).toEqual([]); });`,
+      },
+      {
+        name: "lets the dragon take the last of four amounts",
+        code: `test("lets the dragon take the last of four amounts", () => { expect(plunder([20, 30, 40, 50])).toEqual([40, 60, 80]); });`,
+      },
+      {
+        name: "leaves exactly three amounts alone",
+        code: `test("leaves exactly three amounts alone", () => { expect(plunder([20, 30, 40])).toEqual([40, 60, 80]); });`,
+      },
+    ],
+  },
 ];
