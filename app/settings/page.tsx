@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, Trash } from "pixelarticons/react";
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui";
@@ -182,13 +182,19 @@ function DeleteAccount({ username }: { username: string }) {
 export default function SettingsPage() {
   const session = useSession();
   const [prefs, setPrefs] = useState<Preferences | null>(null);
-  const [saving, setSaving] = useState(false);
+  // saves run one after another so a slow request can't overwrite a newer choice
+  const queue = useRef(Promise.resolve());
+  const savedNote = useRef("");
 
   useEffect(() => {
     let cancelled = false;
     void getGameData()
       .getPreferences()
-      .then((p) => !cancelled && setPrefs(p));
+      .then((p) => {
+        if (cancelled) return;
+        savedNote.current = p.note;
+        setPrefs(p);
+      });
     return () => {
       cancelled = true;
     };
@@ -202,24 +208,24 @@ export default function SettingsPage() {
     );
   }
 
-  const set = <K extends keyof Preferences>(key: K, value: Preferences[K]) => setPrefs({ ...prefs, [key]: value });
-
-  async function save() {
-    if (!prefs) return;
-    setSaving(true);
-    try {
-      await getGameData().updatePreferences({ ...prefs, note: prefs.note.slice(0, NOTE_MAX) });
-      toast("Saved.");
-    } catch {
-      toast("Your settings couldn't be saved. Try again in a moment.");
-    } finally {
-      setSaving(false);
-    }
+  function save(next: Preferences) {
+    savedNote.current = next.note;
+    queue.current = queue.current
+      .then(() => getGameData().updatePreferences(next))
+      .catch(() => void toast("Your settings couldn't be saved. Try again in a moment."));
   }
+
+  // choices save right away, the note saves when the player leaves the box
+  const set = <K extends keyof Preferences>(key: K, value: Preferences[K]) => {
+    const next = { ...prefs, [key]: value };
+    setPrefs(next);
+    save(next);
+  };
 
   return (
     <SitePage>
-      <h1 className="display -mt-4 pb-8 text-[36px] sm:text-[44px]">Settings</h1>
+      <h1 className="display -mt-4 text-[36px] sm:text-[44px]">Settings</h1>
+      <p className="pt-2 pb-8 text-sm text-muted-foreground">Changes save automatically.</p>
       <div className="grid grid-cols-1 gap-14 lg:grid-cols-[1.15fr_1fr]">
         <section className="flex flex-col gap-6">
           <span className="retro text-[11px] text-muted-foreground">Profile</span>
@@ -252,7 +258,8 @@ export default function SettingsPage() {
                 font="normal"
                 value={prefs.note}
                 maxLength={NOTE_MAX}
-                onChange={(e) => set("note", e.target.value)}
+                onChange={(e) => setPrefs({ ...prefs, note: e.target.value })}
+                onBlur={() => prefs.note !== savedNote.current && save(prefs)}
                 rows={3}
                 className="resize-none text-[15px]"
               />
@@ -261,12 +268,6 @@ export default function SettingsPage() {
               </span>
             </div>
           </Field>
-          <div>
-            <Button className="mx-1.5 gap-2 px-8 text-[11px]" onClick={save} disabled={saving}>
-              {saving && <Spinner variant="diamond" className="size-4" />}
-              Save
-            </Button>
-          </div>
         </section>
       </div>
     </SitePage>

@@ -41,9 +41,21 @@ type Props = {
   sidebar: Omit<SidebarInfo, "inventory" | "state">;
   /** called when XP changes so the page can reload the level bar */
   onProgress: () => void;
+  /** called once finish_adventure has run and the turn is over, so the page can show the completion screen */
+  onComplete: (messages: GameUIMessage[]) => void;
 };
 
-export function GameChat({ runId, trackId, concepts, initialMessages, initialInventory, initialEncounters, sidebar, onProgress }: Props) {
+export function GameChat({
+  runId,
+  trackId,
+  concepts,
+  initialMessages,
+  initialInventory,
+  initialEncounters,
+  sidebar,
+  onProgress,
+  onComplete,
+}: Props) {
   const [inventory, setInventory] = useState(initialInventory);
   const [encounters, setEncounters] = useState(initialEncounters);
   const [openLessons, setOpenLessons] = useState<string[]>(() => lessonsGiven(initialMessages)); // concept slugs
@@ -51,9 +63,11 @@ export function GameChat({ runId, trackId, concepts, initialMessages, initialInv
   const [aiDown, setAiDown] = useState<AiDown | null>(null);
   const [turnFailed, setTurnFailed] = useState(false); // our own error, not an outage: offer a retry, stay online
   const [offers, setOffers] = useState<StoredEnemy[]>([]);
-  // no-AI mode tracks browser-started fights and queues their summaries until AI returns
+  // no-AI mode tracks browser-started fights
   const [offlineFight, setOfflineFight] = useState<ActiveFight | null>(null);
-  const [pendingEnds, setPendingEnds] = useState<{ encounterId: string; summary: string }[]>([]);
+  // encounter_end summaries wait here until the chat is idle, or until AI returns in no-AI mode
+  const [pendingEnds, setPendingEnds] = useState(() => unfinishedBoss(initialEncounters, initialMessages));
+  const sentEnds = useRef(new Set<string>()); // the sending effect can't clear pendingEnds, so it skips sent ones instead
   const [endedLocally, setEndedLocally] = useState<ReadonlySet<string>>(new Set());
   // a fight that just ended stays in its tab, showing the result, until the tab is closed or another fight starts
   const [recentlyEnded, setRecentlyEnded] = useState<ActiveFight | null>(null);
@@ -88,6 +102,7 @@ export function GameChat({ runId, trackId, concepts, initialMessages, initialInv
       else setTurnFailed(true);
     },
     onFinish: async ({ isError, isAbort, isDisconnect }) => {
+      refreshEncounters(); // a turn can start a fight that a later regenerate() drops from the messages
       const hint = pendingHint.current;
       pendingHint.current = null;
       if (!hint || isError || isAbort || isDisconnect) return; // a failed turn doesn't spend the hint
@@ -108,7 +123,7 @@ export function GameChat({ runId, trackId, concepts, initialMessages, initialInv
     void sendMessage({ text: "Begin the adventure.", metadata: { action: "start" } });
   }, [initialMessages.length, sendMessage]);
 
-  const active = offlineFight ?? findActiveEncounter(messages, endedLocally);
+  const active = offlineFight ?? findActiveEncounter(messages, endedLocally) ?? orphanedEncounter(encounters, endedLocally);
   const shownFight = active ?? recentlyEnded;
   const latestLesson = findLatestLesson(messages);
   const busy = status === "submitted" || status === "streaming";
@@ -159,24 +174,38 @@ export function GameChat({ runId, trackId, concepts, initialMessages, initialInv
     setOfflineFight((f) => (f?.encounterId === ended.encounterId ? null : f));
     setRecentlyEnded(dismiss ? null : ended);
     refreshEncounters();
-    const text = summary.slice(0, 600);
-    if (aiDown) {
-      setPendingEnds((ends) => [...ends, { encounterId: ended.encounterId, summary: text }]);
-    } else {
-      void sendMessage({ text, metadata: { action: "encounter_end", encounterIds: [ended.encounterId], summary: text } });
-    }
+    setPendingEnds((ends) => [...ends, { encounterId: ended.encounterId, summary: summary.slice(0, 600) }]);
+  }
+
+  // send finished fights once the current turn is over, so replies stay in order
+  useEffect(() => {
+    const ends = pendingEnds.filter((e) => !sentEnds.current.has(e.encounterId));
+    if (aiDown || busy || ends.length === 0) return;
+    for (const e of ends) sentEnds.current.add(e.encounterId);
+    void sendMessage(endMessage(ends.map((e) => e.summary).join(". "), ends));
+  }, [aiDown, pendingEnds, busy, sendMessage]);
+
+  // the completion screen waits for the end of the turn, so the closing narration is kept
+  const finished = messages.some((m) => m.parts.some((p) => p.type === "tool-finish_adventure" && p.state === "output-available" && p.output.ok));
+  useEffect(() => {
+    if (finished && !busy) onComplete(messages);
+  }, [finished, busy, onComplete, messages]);
+
+  // continue after finished tool calls, since regenerate() would drop that assistant message and the fight it started
+  function resend() {
+    if (lastAssistantMessageIsCompleteWithToolCalls({ messages })) void sendMessage();
+    else void regenerate();
   }
 
   // leave no-AI mode and flush any offline fight summaries in one encounter_end message
   function retry() {
     setAiDown(null);
-    if (pendingEnds.length > 0) {
-      const summary = `While you were away: ${pendingEnds.map((e) => e.summary.charAt(0).toLowerCase() + e.summary.slice(1)).join(", ")}`.slice(0, 600);
-      const encounterIds = pendingEnds.map((e) => e.encounterId);
-      setPendingEnds([]);
-      void sendMessage({ text: summary, metadata: { action: "encounter_end", encounterIds, summary } });
-    } else if (messages.at(-1)?.role === "user") {
-      void regenerate(); // retry the failed request
+    const ends = pendingEnds.filter((e) => !sentEnds.current.has(e.encounterId));
+    if (ends.length > 0) {
+      for (const e of ends) sentEnds.current.add(e.encounterId);
+      void sendMessage(endMessage(`While you were away: ${ends.map((e) => e.summary.charAt(0).toLowerCase() + e.summary.slice(1)).join(", ")}`, ends));
+    } else {
+      resend(); // retry the failed request
     }
   }
 
@@ -235,7 +264,7 @@ export function GameChat({ runId, trackId, concepts, initialMessages, initialInv
       {turnFailed && status === "error" && (
         <FightError>
           Something went wrong. Try again in a moment.{" "}
-          <Button variant="outline" size="sm" className="ml-2 text-[9px]" onClick={() => { setTurnFailed(false); void regenerate(); }}>
+          <Button variant="outline" size="sm" className="ml-2 text-[9px]" onClick={() => { setTurnFailed(false); resend(); }}>
             Try again
           </Button>
         </FightError>
@@ -416,6 +445,18 @@ function findActiveEncounter(messages: GameUIMessage[], endedLocally: ReadonlySe
   return null;
 }
 
+function endMessage(text: string, ends: { encounterId: string }[]) {
+  const summary = text.slice(0, 600);
+  return { text: summary, metadata: { action: "encounter_end" as const, encounterIds: ends.map((e) => e.encounterId), summary } };
+}
+
+// an active encounter the messages don't show, like a no-AI fight before a reload or one whose turn was regenerated
+// the run allows one active fight, so without this the player could never fight again
+function orphanedEncounter(encounters: Encounter[], endedLocally: ReadonlySet<string>): ActiveFight | null {
+  const e = encounters.find((x) => x.status === "active" && !endedLocally.has(x.id));
+  return e ? { encounterId: e.id, puzzleId: e.puzzleId, enemy: e.enemy } : null;
+}
+
 function showLessonResults(messages: GameUIMessage[]) {
   return messages.flatMap((m) =>
     m.parts.flatMap((p) =>
@@ -435,4 +476,12 @@ function lastLength(messages: GameUIMessage[]): number {
 
 function takeOne(entries: InventoryEntry[], slug: string): InventoryEntry[] {
   return entries.map((e) => (e.item.slug === slug ? { ...e, quantity: e.quantity - 1 } : e)).filter((e) => e.quantity > 0);
+}
+
+// beating the boss completes the run, but the story summary only comes from the game master
+// so after a reload that cut the closing turn short, report the boss again to get it
+function unfinishedBoss(encounters: Encounter[], messages: GameUIMessage[]): { encounterId: string; summary: string }[] {
+  const boss = encounters.find((e) => e.isBoss && e.status === "defeated");
+  const finished = messages.some((m) => m.parts.some((p) => p.type === "tool-finish_adventure" && p.state === "output-available"));
+  return boss && !finished ? [{ encounterId: boss.id, summary: `Defeated ${boss.enemy.name}, the boss` }] : [];
 }

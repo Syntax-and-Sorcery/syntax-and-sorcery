@@ -50,7 +50,7 @@ function InlineCode({ children }: { children?: ReactNode }) {
   const theme = useEditorTheme();
   const text = String(children ?? "");
   return (
-    <code className="px-1 py-0.5 text-[0.92em]" style={{ background: theme.background, color: theme.foreground }}>
+    <code className="rounded px-1 py-0.5 text-[0.92em]" style={{ background: theme.background, color: theme.foreground }}>
       {highlightInline(text, theme.styles as Rule[])}
     </code>
   );

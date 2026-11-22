@@ -35,6 +35,7 @@ export interface GameContext {
   supabase: SessionUser["supabase"]; // queries run as this player with RLS
   runId: string;
   runStatus: "in_progress" | "completed";
+  storySaved: boolean;
   adventureId: string;
   adventureTitle: string;
   adventureSummary: string;
@@ -57,7 +58,7 @@ export async function loadGameContext(user: SessionUser, runId: string): Promise
   const db = user.supabase;
   const { data: run, error: runError } = await db
     .from("adventure_runs")
-    .select("id, adventure_id, status")
+    .select("id, adventure_id, status, story_summary")
     .eq("id", runId)
     .maybeSingle();
   if (runError) throw runError;
@@ -129,6 +130,7 @@ export async function loadGameContext(user: SessionUser, runId: string): Promise
     supabase: db,
     runId: run.id,
     runStatus: run.status as GameContext["runStatus"],
+    storySaved: !!run.story_summary,
     adventureId: adventure.id,
     adventureTitle: adventure.title,
     adventureSummary: adventure.summary,
@@ -195,7 +197,8 @@ function playerBlock(ctx: GameContext): string {
 
 // server computes adventure progress so the model never tracks clears or boss unlocks itself
 function stateBlock(ctx: GameContext, lessons: Set<string>): string {
-  if (ctx.runStatus === "completed") return "Adventure state\n- The adventure is complete. Chat freely; there are no more fights to offer.";
+  // beating the boss completes the run, but the game master still owes the story summary
+  if (ctx.runStatus === "completed" && ctx.storySaved) return "Adventure state\n- The adventure is complete. Chat freely; there are no more fights to offer.";
 
   const state = adventureState(ctx.concepts, ctx.encounters);
   const need = RULES.adventure.winsToClear;

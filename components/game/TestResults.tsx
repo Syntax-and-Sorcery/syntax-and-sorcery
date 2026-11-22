@@ -1,6 +1,6 @@
 import { Check, Close } from "pixelarticons/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/8bit/tabs";
-import type { GradeResult, RunResult, TestResult } from "@/lib/types";
+import type { GradeResult, RunResult, RunStatus, TestResult } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 // shows only the newest result, since Run clears the Submit and a Submit is always newer than the Run it keeps
@@ -10,12 +10,13 @@ export function TestResults({ run, submit }: { run: RunResult | null; submit: Gr
 
   const status = latest.status ?? "ok";
   const stdout = latest.stdout ?? "";
-  const marks = submit ? (submit.hiddenTests ?? []) : (run?.tests ?? []).map((t) => t.passed);
+  // any other status means the tests never finished, so the grader's all-red marks would be made up
+  const marks = status !== "ok" ? [] : submit ? (submit.hiddenTests ?? []) : (run?.tests ?? []).map((t) => t.passed);
   const passed = marks.filter(Boolean).length;
 
   return (
     <div className="flex flex-col gap-4">
-      {status !== "ok" && latest.message && <StatusNotice message={latest.message} />}
+      {status !== "ok" && <StatusNotice message={latest.message} status={status} />}
       {marks.length > 0 ? (
         <Tabs defaultValue="tests" font="normal" className="gap-4">
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
@@ -92,12 +93,26 @@ function Printed({ stdout }: { stdout: string }) {
   );
 }
 
-// TODO(T-06): add the beginner-friendly title and body for the status above the raw message
-function StatusNotice({ message }: { message: string }) {
+// TODO(T-06): move this copy to runStatusMessage and add the beginner-friendly title and body above the raw message
+const FALLBACK: Record<Exclude<RunStatus, "ok">, string> = {
+  syntax_error: "There's a mistake in the code.",
+  runtime_error: "There's a mistake in the code.",
+  timeout: "The code ran for too long and was stopped.",
+  memory: "The code used too much memory and was stopped.",
+  limit: "You've used all your runs for today.",
+  busy: "The sandbox is busy. Try again in a moment.",
+  internal_error: "Something went wrong running the code. Try again in a moment.",
+};
+
+function StatusNotice({ message, status }: { message?: string; status: Exclude<RunStatus, "ok"> }) {
   return (
     <div role="alert" className="flex items-start gap-3 border-l-4 border-hp bg-hp/10 px-3 py-2.5 text-sm">
       <Close width={16} height={16} className="mt-0.5 shrink-0 text-hp" aria-hidden />
-      <code className="min-w-0 break-words text-hp">{message}</code>
+      {message ? (
+        <code className="min-w-0 break-words text-hp">{message}</code>
+      ) : (
+        <span className="min-w-0 text-hp">{FALLBACK[status]}</span>
+      )}
     </div>
   );
 }
