@@ -35,3 +35,22 @@ describe("xpForDefeat", () => {
     expect(xpForDefeat({ kind: "mcq", difficulty: 2, isBoss: false, basicHintsUsed: 1 })).toBe(11);
   });
 });
+
+describe("TC-FR-24 XP with and without hints", () => {
+  const kinds = ["mcq", "short", "code"] as const;
+
+  it.each(kinds)("awards less XP for %s puzzles solved with a hint than without", (kind) => {
+    for (const isBoss of [false, true]) {
+      const clean = xpForDefeat({ kind, difficulty: 3, isBoss, basicHintsUsed: 0 });
+      const hinted = xpForDefeat({ kind, difficulty: 3, isBoss, basicHintsUsed: 1 });
+      expect(clean).toBeGreaterThan(0);
+      expect(hinted).toBeGreaterThan(0);
+      expect(hinted).toBeLessThan(clean);
+    }
+  });
+
+  it("never awards more XP for using more hints", () => {
+    const xp = [0, 1, 2, 3, 4, 5].map((basicHintsUsed) => xpForDefeat({ kind: "code", difficulty: 2, isBoss: false, basicHintsUsed }));
+    for (let i = 1; i < xp.length; i++) expect(xp[i]).toBeLessThanOrEqual(xp[i - 1]);
+  });
+});
