@@ -70,7 +70,7 @@ export async function POST(req: Request) {
     stopWhen: isStepCount(8),
     // the system prompt changes every turn, which voids earlier thinking blocks
     // drop those instead of letting Anthropic reject the whole request
-    providerOptions: { anthropic: { thinking: { blockBinding: { prefixMismatchBehavior: "drop_block" } } } },
+    providerOptions: { anthropic: { thinking: { type: "adaptive", blockBinding: { prefixMismatchBehavior: "drop_block" } } } },
   });
   void result.consumeStream(); // keeps generating even if the player closes the tab
 
