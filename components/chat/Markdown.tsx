@@ -1,25 +1,17 @@
 "use client";
 
 // uses CodeMirror instead of Shiki for code blocks so the colors match the editor
-// inline code uses the theme's highlight rules once T-24 adds them
+// inline code is colored with the same theme's highlight rules
 // keep Streamdown's default pre tag so it sets data-block and separates block code from inlineCode
 import { Fragment, type CSSProperties, type ReactNode } from "react";
 import { Streamdown } from "streamdown";
 import { javascriptLanguage } from "@codemirror/lang-javascript";
 import { highlightCode, tagHighlighter, type Tag } from "@lezer/highlight";
-import { CodeEditor, themeBackground } from "@/components/editor/CodeEditor";
+import { CodeEditor } from "@/components/editor/CodeEditor";
 import { useEditorTheme } from "@/components/editor/themes";
 import { cn } from "@/lib/utils";
 
 type Rule = { tag: Tag | readonly Tag[]; color?: string; fontWeight?: string; fontStyle?: string };
-type Theme = ReturnType<typeof useEditorTheme>;
-
-function themeRules(theme: Theme): Rule[] | null {
-  return "styles" in theme && Array.isArray(theme.styles) ? (theme.styles as Rule[]) : null;
-}
-function themeForeground(theme: Theme): string | undefined {
-  return "foreground" in theme && typeof theme.foreground === "string" ? theme.foreground : undefined;
-}
 
 // the theme's tag-to-color rules, with stable class names so server and client render the same spans
 function highlightInline(text: string, rules: Rule[]): ReactNode[] {
@@ -57,13 +49,9 @@ function highlightInline(text: string, rules: Rule[]): ReactNode[] {
 function InlineCode({ children }: { children?: ReactNode }) {
   const theme = useEditorTheme();
   const text = String(children ?? "");
-  const rules = themeRules(theme);
   return (
-    <code
-      className="bg-card px-1 py-0.5 text-[0.92em] text-[#c0caf5]"
-      style={{ background: themeBackground(theme), color: themeForeground(theme) }}
-    >
-      {rules ? highlightInline(text, rules) : text}
+    <code className="px-1 py-0.5 text-[0.92em]" style={{ background: theme.background, color: theme.foreground }}>
+      {highlightInline(text, theme.styles as Rule[])}
     </code>
   );
 }

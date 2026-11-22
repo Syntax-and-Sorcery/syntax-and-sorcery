@@ -9,7 +9,7 @@ import { python } from "@codemirror/lang-python";
 import { linter, lintGutter, type Diagnostic } from "@codemirror/lint";
 import type { EditorTheme, Language } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { EDITOR_THEMES, useEditorTheme } from "./themes";
+import { editorTheme, useEditorTheme } from "./themes";
 
 // placeholder lint rule until puzzles define forbidden syntax
 const exampleLinter = linter((view) => {
@@ -33,16 +33,6 @@ export interface CodeEditorProps {
   "aria-label"?: string;
 }
 
-type ThemeEntry = (typeof EDITOR_THEMES)[EditorTheme];
-/** returns the theme's background color once T-24 populates the theme registry */
-export function themeBackground(theme: ThemeEntry): string | undefined {
-  return "background" in theme && typeof theme.background === "string" ? theme.background : undefined;
-}
-// fall back to CodeMirror's built-in dark theme while T-24 theme extensions are empty
-function themeExtension(theme: ThemeEntry) {
-  return Array.isArray(theme.extension) && theme.extension.length === 0 ? "dark" : theme.extension;
-}
-
 export function CodeEditor({
   value,
   onChange,
@@ -55,17 +45,17 @@ export function CodeEditor({
   "aria-label": ariaLabel,
 }: CodeEditorProps) {
   const playerTheme = useEditorTheme();
-  const t = theme ? EDITOR_THEMES[theme] : playerTheme;
+  const t = theme ? editorTheme(theme) : playerTheme;
   const extensions = useMemo(
     () => [language === "python" ? python() : javascript(), ...(readOnly ? [] : [exampleLinter, lintGutter()])],
     [language, readOnly],
   );
   return (
-    <div className={cn("py-2", className)} style={{ background: themeBackground(t) }}>
+    <div className={cn("py-2", className)} style={{ background: t.background }}>
       <CodeMirror
         value={value}
         onChange={onChange ? (v) => onChange(v) : undefined}
-        theme={themeExtension(t)}
+        theme={t.extension}
         extensions={extensions}
         editable={!readOnly}
         readOnly={readOnly}
