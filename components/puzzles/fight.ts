@@ -3,6 +3,7 @@
 // coordinates submit, flee, and report for all puzzle kinds, then passes a one-line encounter_end summary to onEnd
 import { useRef, useState } from "react";
 import { toast } from "@/components/ui/8bit/toast";
+import { clearDraft } from "@/components/editor/useDraft";
 import { lootFor, xpFor } from "@/components/game/rules";
 import { levelForXp } from "@/lib/rules/levels";
 import { getGameApi } from "@/lib/api";
@@ -78,6 +79,7 @@ export function useFight(puzzle: PlayerPuzzle, { encounterId, enemy, trackId, on
     const xp = xpFor({ kind: puzzle.kind, difficulty: puzzle.difficulty, isBoss: encounter.isBoss, basicHintsUsed: encounter.basicHints }) ?? 0;
     const items = lootFor({ isBoss: encounter.isBoss, difficulty: puzzle.difficulty }, before, before + xp);
     const settled = await data.settleEncounter({ encounterId, answer, result, xp, items });
+    clearDraft(encounterId);
     setHp(0);
     setOutcome({ type: "won", xp: settled ? xp : 0, items: settled ? items : [] });
     if (settled) {
@@ -127,6 +129,7 @@ export function useFight(puzzle: PlayerPuzzle, { encounterId, enemy, trackId, on
     setBusy(true);
     try {
       await getGameData().fleeEncounter(encounterId);
+      clearDraft(encounterId);
       setOutcome({ type: "fled" });
       const n = submits.current;
       onEnd(n > 0 ? `Fled from ${enemy.name} after ${plural(n, "Submit")}` : `Fled from ${enemy.name}`, { dismiss: true });

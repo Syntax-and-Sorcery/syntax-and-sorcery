@@ -31,7 +31,7 @@ export function CodePuzzle({
   onFightState: (state: FightState) => void;
 }) {
   const { maximised, desktop } = useShell();
-  const draft = useDraft(encounterId); // persists code across reloads (T-30)
+  const draft = useDraft(encounterId);
   const [code, setCode] = useState(() => draft.draft ?? puzzle.starterCode);
   const [running, setRunning] = useState<"run" | "submit" | null>(null);
   const [run, setRun] = useState<RunResult | null>(null);
@@ -67,7 +67,6 @@ export function CodePuzzle({
     try {
       const result = await fight.submit(code);
       setSubmitResult(result);
-      if (result.passed) draft.clear();
       onFightState({ code, lastResults: lastResultsOf("submit", result) });
     } catch {
       setFailed(true);
@@ -86,10 +85,8 @@ export function CodePuzzle({
         className="mr-auto -ml-2 gap-1.5 text-[9px] text-muted-foreground"
         disabled={busy || done}
         aria-label="Reset code"
-        onClick={() => {
-          setCode(puzzle.starterCode);
-          draft.clear();
-        }}
+        // through change() so the saved draft and the code hints see are reset too
+        onClick={() => change(puzzle.starterCode)}
       >
         <Undo width={14} height={14} />
         <span className="hidden sm:inline">Reset code</span>
