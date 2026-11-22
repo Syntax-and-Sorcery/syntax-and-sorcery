@@ -82,4 +82,56 @@ export const basics: SeedPuzzle[] = [
     rubric:
       'Passes if it says the result is "Cap" and that the end position is not included. Wording doesn\'t matter.',
   },
+
+  // puzzle 6 (boss)
+  {
+    kind: "code",
+    concept: "boss",
+    difficulty: 3,
+    theme: "fantasy",
+    title: "The Treasure Ledger",
+    description:
+      "Split gold among heroes and return a sentence with each share and the leftover; tests even splits, remainders and one hero.",
+    starterCode: `// Split gold evenly among heroes and report the result.
+// Input: hero (a name), gold and heroes (whole numbers, heroes is at least 1).
+// Each hero gets a whole number of coins; the rest is left over.
+// Return the text: <hero> gets <share> gold (<left> left over)
+// Example: describeLoot("Ana", 25, 4) returns "Ana gets 6 gold (1 left over)".
+function describeLoot(hero, gold, heroes) {
+  let report = "";
+  // Your code goes here
+  return report;
+}`,
+    referenceSolution: `function describeLoot(hero, gold, heroes) {
+  let report = "";
+  const share = Math.floor(gold / heroes);
+  const left = gold % heroes;
+  report = hero + " gets " + share + " gold (" + left + " left over)";
+  return report;
+}`,
+    sampleTests: [
+      {
+        name: "reports the share and leftover for a typical split",
+        code: `test("reports the share and leftover for a typical split", () => { expect(describeLoot("Ana", 25, 4)).toBe("Ana gets 6 gold (1 left over)"); });`,
+      },
+    ],
+    hiddenTests: [
+      {
+        name: "reports no leftover when the gold divides evenly",
+        code: `test("reports no leftover when the gold divides evenly", () => { expect(describeLoot("Bo", 20, 5)).toBe("Bo gets 4 gold (0 left over)"); });`,
+      },
+      {
+        name: "gives everything as leftover when gold is short of a round",
+        code: `test("gives everything as leftover when gold is short of a round", () => { expect(describeLoot("Cy", 7, 10)).toBe("Cy gets 0 gold (7 left over)"); });`,
+      },
+      {
+        name: "gives a lone hero all the gold",
+        code: `test("gives a lone hero all the gold", () => { expect(describeLoot("Dee", 9, 1)).toBe("Dee gets 9 gold (0 left over)"); });`,
+      },
+      {
+        name: "uses a longer name and a bigger pile",
+        code: `test("uses a longer name and a bigger pile", () => { expect(describeLoot("Elara", 100, 3)).toBe("Elara gets 33 gold (1 left over)"); });`,
+      },
+    ],
+  },
 ];
