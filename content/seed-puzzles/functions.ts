@@ -85,4 +85,61 @@ export const functions: SeedPuzzle[] = [
       "Passes if it says the parentheses call or run the function, and the name alone only refers to it without running it. Wording doesn't matter.",
     maxLength: 300,
   },
+
+  // puzzle 6 (boss)
+  {
+    kind: "code",
+    concept: "boss",
+    difficulty: 4,
+    theme: "fantasy",
+    title: "The Potion Merchant's Ledger",
+    description:
+      "Write an arrow function for a taxed price and a function that totals several potions; tests the tax, the count and repeated calls.",
+    starterCode: `// A potion shop adds 10% tax to every price.
+// 1. priceWithTax: an arrow function that takes price and returns price plus 10% of it.
+//    Example: priceWithTax(20) returns 22.
+// 2. totalCost(price, count): returns what count potions cost, tax included, using priceWithTax.
+//    Keep your working variables inside the function.
+//    Example: totalCost(20, 3) returns 66.
+const priceWithTax = null; // replace null with an arrow function
+
+function totalCost(price, count) {
+
+}`,
+    referenceSolution: `const priceWithTax = (price) => price + price / 10;
+
+function totalCost(price, count) {
+  let total = 0;
+  total = priceWithTax(price) * count;
+  return total;
+}`,
+    sampleTests: [
+      {
+        name: "adds ten percent tax to one price",
+        code: `test("adds ten percent tax to one price", () => { expect(priceWithTax(20)).toBe(22); });`,
+      },
+    ],
+    hiddenTests: [
+      {
+        name: "totals the cost of several potions",
+        code: `test("totals the cost of several potions", () => { expect(totalCost(20, 3)).toBe(66); });`,
+      },
+      {
+        name: "charges nothing for zero potions",
+        code: `test("charges nothing for zero potions", () => { expect(totalCost(50, 0)).toBe(0); });`,
+      },
+      {
+        name: "handles a price whose tax has a fraction",
+        code: `test("handles a price whose tax has a fraction", () => { expect(totalCost(15, 2)).toBe(33); });`,
+      },
+      {
+        name: "gives the same answer on repeated calls",
+        code: `test("gives the same answer on repeated calls", () => { expect(totalCost(20, 3)).toBe(66); expect(totalCost(20, 3)).toBe(66); });`,
+      },
+      {
+        name: "taxes other prices on their own",
+        code: `test("taxes other prices on their own", () => { expect(priceWithTax(50)).toBe(55); expect(priceWithTax(0)).toBe(0); });`,
+      },
+    ],
+  },
 ];
