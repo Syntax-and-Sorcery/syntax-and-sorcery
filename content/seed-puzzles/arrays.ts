@@ -46,4 +46,34 @@ export const arrays: SeedPuzzle[] = [
     explanation:
       "`filter` returns a new array holding only the items for which the condition is true: 12 and 20.",
   },
+
+  // puzzle 4
+  {
+    kind: "short",
+    concept: "looping-over-arrays",
+    difficulty: 2,
+    title: "One Step Too Far",
+    description: "Explain the bug in a loop that runs past the end of an array.",
+    question:
+      "Why is `for (let i = 0; i <= items.length; i++)` a bug when you loop over an array?",
+    modelAnswer:
+      "Indexes go from 0 to length minus 1. With `<=` the loop runs once more with i equal to the length, which reads past the end and gives undefined.",
+    rubric:
+      "Passes if it says the last valid index is length minus one, so `<=` goes one step past the end (undefined or an extra round). Wording doesn't matter.",
+  },
+
+  // puzzle 5
+  {
+    kind: "short",
+    concept: "find",
+    difficulty: 3,
+    title: "The Empty Search",
+    description: "Explain what find and filter return when nothing matches.",
+    question:
+      "What do `find` and `filter` each return when no item matches the condition?",
+    modelAnswer:
+      "`find` returns undefined, because it gives back a single item. `filter` returns an empty array, because it always gives back a list.",
+    rubric:
+      "Passes if it says find gives undefined and filter gives an empty array. Wording and examples don't matter.",
+  },
 ];
