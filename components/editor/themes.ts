@@ -1,20 +1,36 @@
-// TODO(T-24): wire up the @uiw/codemirror-theme-* extensions and highlight styles
 "use client";
 
 import { createContext, useContext } from "react";
-import type { Extension } from "@codemirror/state";
-import type { EditorTheme } from "@/lib/types";
+import { createTheme, type CreateThemeOptions } from "@uiw/codemirror-themes";
+import { draculaDarkStyle } from "@uiw/codemirror-theme-dracula";
+import { githubDarkStyle, githubLightStyle } from "@uiw/codemirror-theme-github";
+import { nordDarkStyle } from "@uiw/codemirror-theme-nord";
+import { tokyoNightStyle } from "@uiw/codemirror-theme-tokyo-night";
+import { DEFAULT_PREFERENCES, type EditorTheme } from "@/lib/types";
 
-export const EDITOR_THEMES: Record<EditorTheme, { label: string; extension: Extension }> = {
-  "tokyo-night": { label: "Tokyo Night", extension: [] },
-  dracula: { label: "Dracula", extension: [] },
-  "github-dark": { label: "GitHub Dark", extension: [] },
-  nord: { label: "Nord", extension: [] },
-  "github-light": { label: "GitHub Light", extension: [] },
+// colors and styles stay on the entry so inline code in the chat can match the editor
+function theme(label: string, mode: "dark" | "light", background: string, foreground: string, styles: CreateThemeOptions["styles"]) {
+  const settings = { background, foreground, gutterBackground: background, gutterBorder: "transparent", fontFamily: "var(--font-body), ui-monospace, monospace" };
+  return { label, background, foreground, styles, extension: createTheme({ theme: mode, settings, styles }) };
+}
+
+export const EDITOR_THEMES = {
+  // a touch darker than stock so it sits nicely on the app's panels
+  "tokyo-night": theme("Tokyo Night", "dark", "#13141c", "#c0caf5", tokyoNightStyle),
+  dracula: theme("Dracula", "dark", "#282a36", "#f8f8f2", draculaDarkStyle),
+  "github-dark": theme("GitHub Dark", "dark", "#0d1117", "#c9d1d9", githubDarkStyle),
+  nord: theme("Nord", "dark", "#2e3440", "#d8dee9", nordDarkStyle),
+  "github-light": theme("GitHub Light", "light", "#ffffff", "#24292e", githubLightStyle),
 };
+export type EditorThemeEntry = ReturnType<typeof theme>;
 
-// the adventure and settings pages pass in profiles.preferences.editorTheme
-export const EditorThemeContext = createContext<EditorTheme>("tokyo-night");
+// old or hand-edited preferences can hold a name we don't know
+export function editorTheme(name: string | undefined): EditorThemeEntry {
+  return name && Object.hasOwn(EDITOR_THEMES, name) ? EDITOR_THEMES[name as EditorTheme] : EDITOR_THEMES[DEFAULT_PREFERENCES.editorTheme];
+}
+
+// the adventure page passes in profiles.preferences.editorTheme
+export const EditorThemeContext = createContext<EditorTheme>(DEFAULT_PREFERENCES.editorTheme);
 export function useEditorTheme() {
-  return EDITOR_THEMES[useContext(EditorThemeContext)];
+  return editorTheme(useContext(EditorThemeContext));
 }
