@@ -57,15 +57,15 @@ export function EnemyChoiceCard({
       <div className="flex gap-3">
         <EnemyAvatar enemy={enemy} size={48} box={64} />
         <div className="flex min-w-0 flex-col gap-2 pt-1">
-          <span className="retro text-[11px] leading-5">{enemy.name}</span>
+          <span className="retro text-[11px] leading-5 [overflow-wrap:anywhere]">{enemy.name}</span>
           {puzzle && <Skulls value={puzzle.difficulty} size={13} />}
         </div>
       </div>
-      <div className="flex min-h-5 items-center justify-between gap-2 text-[13px]">
+      <div className="flex min-h-5 flex-wrap items-center justify-between gap-x-3 gap-y-1 text-[13px]">
         {puzzle ? (
           <>
             <span className="text-muted-foreground">{KIND_LABEL[puzzle.kind]}</span>
-            <span className="flex gap-3 whitespace-nowrap">
+            <span className="ml-auto flex gap-3 whitespace-nowrap">
               <span className="text-hp">{maxHp(puzzle)} HP</span>
               {xp !== null && <span className="text-xp">+{xp} XP</span>}
             </span>

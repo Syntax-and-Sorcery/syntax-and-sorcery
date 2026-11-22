@@ -230,8 +230,8 @@ export function GameChat({ runId, trackId, concepts, initialMessages, initialInv
 
   const chat = (
     <>
-      <ChatLog messages={messages} onOpenLesson={openLesson} onChoose={(toolCallId, puzzleId) => void addToolOutput({ tool: "ask_choice", toolCallId, output: { puzzleId } })} />
-      {status === "submitted" && <GmMessage thinking />}
+      <ChatLog messages={messages} working={busy} onOpenLesson={openLesson} onChoose={(toolCallId, puzzleId) => void addToolOutput({ tool: "ask_choice", toolCallId, output: { puzzleId } })} />
+      {status === "submitted" && last?.role !== "assistant" && <GmMessage thinking />}
       {turnFailed && status === "error" && (
         <FightError>
           Something went wrong. Try again in a moment.{" "}
@@ -318,17 +318,19 @@ function bossPuzzleIds(messages: GameUIMessage[]): Set<string> {
 /** omit onChoose for read-only mode on completed adventures */
 export function ChatLog({
   messages,
+  working = false,
   onOpenLesson,
   onChoose,
 }: {
   messages: GameUIMessage[];
+  working?: boolean;
   onOpenLesson?: (slug: string) => void;
   onChoose?: (toolCallId: string, puzzleId: string) => void;
 }) {
   const bossIds = bossPuzzleIds(messages);
   return (
     <>
-      {messages.map((m) => {
+      {messages.map((m, index) => {
         if (m.role === "user") {
           const meta = m.metadata;
           if (meta?.action === "start") return null;
@@ -382,8 +384,12 @@ export function ChatLog({
               return null;
           }
         });
-        if (!items.some(Boolean)) return null;
-        return <GmMessage key={m.id}>{items}</GmMessage>;
+        // keep the live reply mounted so the game master doesn't vanish while thinking or calling tools
+        const live = working && index === messages.length - 1;
+        if (!items.some(Boolean) && !live) return null;
+        // "The dungeon shifts…" already has its own spinner
+        const generating = m.parts.some((p) => p.type === "tool-generate_puzzle" && (p.state === "input-streaming" || p.state === "input-available"));
+        return <GmMessage key={m.id} thinking={live && !generating}>{items}</GmMessage>;
       })}
     </>
   );

@@ -16,7 +16,8 @@ export function EncounterChoice({
 }) {
   const [picked, setPicked] = useState<string | null>(null);
   return (
-    <div className="grid grid-cols-1 gap-5 pt-3 sm:grid-cols-2 xl:grid-cols-3">
+    // fit as many cards as the chat column allows, which is narrower when a side panel is open
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(min(205px,100%),1fr))] gap-5 pt-3">
       {options.map((o) => (
         <EnemyChoiceCard
           key={o.puzzleId}
