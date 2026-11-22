@@ -7,10 +7,10 @@
 
 ## Team
 
-Syntax & Sorcery is a collaborative software engineering project. For the full, up-to-date development history and contributors, see the [commit history](../../commits/main) and [pull requests](../../pulls).
+Syntax & Sorcery is a collaborative software engineering project. For the full, up-to-date development history and contributors, see the [commit history](https://github.com/Syntax-and-Sorcery/syntax-and-sorcery/commits/main/) and [pull requests](https://github.com/Syntax-and-Sorcery/syntax-and-sorcery/pulls).
 
 Documented implementation contributions include:
-- **CodeVoyager811:** XP reward calculation (T2, [PR #4](../../pull/4)) and loot drop / level-up reward rules (T3, [PR #5](../../pull/5)), with unit tests.
+- **CodeVoyager811:** XP reward calculation (T2, [PR #4](https://github.com/Syntax-and-Sorcery/syntax-and-sorcery/pull/4)) and loot drop / level-up reward rules (T3, [PR #5](https://github.com/Syntax-and-Sorcery/syntax-and-sorcery/pull/5)), with unit tests.
 
 Other team contributions are recorded in GitHub history. Specific team roles can be added here once confirmed by the team.
 
