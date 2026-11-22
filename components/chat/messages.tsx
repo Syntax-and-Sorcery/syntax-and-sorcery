@@ -1,12 +1,15 @@
 "use client";
 
 // uses plain layouts instead of 8bitcn's dialogue component, which puts a heavy frame around every message
-import type { ReactNode } from "react";
+import { Children, type ReactNode } from "react";
 import { Spinner } from "@/components/ui/8bit/spinner";
 import { GameMasterSprite } from "@/components/game/Sprite";
 import { cn } from "@/lib/utils";
 
 export function GmMessage({ children, thinking }: { children?: ReactNode; thinking?: boolean }) {
+  // with content, the spinner goes under it, where the chat scrolls to
+  const empty = Children.toArray(children).length === 0;
+  const spinner = <Spinner variant="diamond" className="size-4 text-primary" aria-label="The game master is thinking" />;
   return (
     <div className="flex gap-3">
       <div className="grid size-10 shrink-0 place-items-center border-2 border-border bg-card">
@@ -15,9 +18,10 @@ export function GmMessage({ children, thinking }: { children?: ReactNode; thinki
       <div className="flex min-w-0 flex-1 flex-col gap-2 pt-0.5">
         <span className="flex items-center gap-2">
           <span className="retro text-[9px] text-muted-foreground">Game master</span>
-          {thinking && <Spinner variant="diamond" className="size-4 text-primary" aria-label="The game master is thinking" />}
+          {thinking && empty && spinner}
         </span>
         {children}
+        {thinking && !empty && spinner}
       </div>
     </div>
   );
