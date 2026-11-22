@@ -1,13 +1,20 @@
-// TODO(T-02): defeat XP formula from RULES.xp
 import type { PuzzleKind } from "@/lib/types";
+import { RULES } from "./config";
 
-// formula: round(base[kind] * (1 + perDifficulty * (difficulty - 1)) * bossMultiplier - hintPenalty), clamped at 0
 export function xpForDefeat(input: {
   kind: PuzzleKind;
   difficulty: number;
   isBoss: boolean;
   basicHintsUsed: number;
 }): number {
-  void input;
-  throw new Error("TODO");
+  const { base, perDifficulty, bossMultiplier, basicHintPenalty } = RULES.xp;
+
+  const baseXP = base[input.kind];
+  const difficultyBonus = 1 + perDifficulty * (input.difficulty - 1);
+  const bossBonus = input.isBoss ? bossMultiplier : 1;
+
+  const totalXP = baseXP * difficultyBonus * bossBonus;
+  const hintPenalty = totalXP * basicHintPenalty * input.basicHintsUsed;
+
+  return Math.max(0, Math.round(totalXP - hintPenalty));
 }
